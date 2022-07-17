@@ -9,8 +9,16 @@ import './styles.css'
 
 function SalesCard() {
 
-  const min = new Date(new Date().setDate(new Date().getDate() - 365))
+  const coinFormat = {
+    mininumFractionDigits: 2,
+    style: 'currency',
+    currency: 'BRL',
+  }
+  
+   //new Date(sale.date).toLocaleDateString()
   const max = new Date()
+  const min = new Date(new Date().setDate(new Date().getDate() - 365))
+  
 
   const [minDate, setMinDate] = useState(min)
   const [maxDate, setMaxDate] = useState(max)
@@ -18,13 +26,18 @@ function SalesCard() {
   const [sales, setSales] = useState<Sale[]>([])
 
   useEffect(() => {
-    axios.get(`${BASE_URL}/sales`)
+    
+    const dmin = minDate.toISOString().slice(0, 10)
+    const dmax = maxDate.toISOString().slice(0, 10)
+    console.log(dmin)
+
+    axios.get(`${BASE_URL}/sales?minDate=${dmin}&maxDate=${dmax}`)
       .then(response => {
         setSales(response.data.content)
       })
-  }, [])
+  }, [minDate, maxDate])
   return (
-
+    
     <div className="dsmeta-card">
       <h2 className="dsmeta-sales-title">Vendas</h2>
       <div>
@@ -64,13 +77,14 @@ function SalesCard() {
           <tbody>
             {sales.map(sale => {
               return (
-                <tr key = {sale.id}>
+                <tr key={sale.id}>
                   <td className="tc992">{sale.id}</td>
-                  <td className="tc576">{new Date(sale.date).toDateString()}</td>
+                  
+                  <td className="tc576">{new Date(sale.date).toLocaleDateString()}</td>
                   <td>{sale.sellerName}</td>
                   <td className="tc992">{sale.visited}</td>
                   <td className="tc992">{sale.deals}</td>
-                  <td>{sale.amount.toFixed(2)}</td>
+                  <td>{sale.amount.toLocaleString('pt-br', coinFormat)}</td>
                   <td>
                     <div className="dsmeta-btn-container">
                       <NotificationButton />
